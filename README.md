@@ -1,7 +1,7 @@
 # nextflow-velocyto
 Nextflow version of cellgeni/velocyto for testing on Nextflow Tower
 
-`examples/RESUME-velocyto` - script that executes velocyto nextflow pipeline, has 3 hardcode arguments (for testing sake):
+`examples/RESUME-velocyto` - script that executes velocyto nextflow pipeline, has 3 hardcoded arguments (for testing sake):
 * `/path/to/sample/file`
 * `/path/to/config/file`
 * `/path/to/nextflow/script`
