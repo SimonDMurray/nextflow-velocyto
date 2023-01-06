@@ -41,7 +41,7 @@ def errorMessage() {
 }
 
 //Puts samplefile into a channel unless it is null, if it is null then it displays error message and exits with status 1.
-ch_sample_list = params.SAMPLEFILE   != null? Channel.fromPath(params.SAMPLEFILE)    : errorMessage() 
+ch_sample_list = params.SAMPLEFILE != null ? Channel.fromPath(params.SAMPLEFILE) : errorMessage() 
 
 //Each line of the sample file is read and then emitted to its own channel which is used as input to the first process, so each sample will be ran in parallel
 ch_sample_list
@@ -73,11 +73,14 @@ process get_velocyto {
 
 process run_velocyto {
 
+  //output velocyto files to results directory
+  publishDir !{params.outdir}
+
   input:
   set NAME, val(files_list) from ch_run_velocyto
 
-  output:
-  path('*.velocyto') into ch_output
+  //output:
+  //path('*.velocyto') into ch_output
 
   shell:
   '''
@@ -97,9 +100,3 @@ process run_velocyto {
     !{params.GTF}
   '''
 }
-
-//the directory containing the loom file is passed to this channel where it is copied to outdir
-ch_output
-  .subscribe {
-      it.copyTo(!{params.outdir} + "/")
-  }
