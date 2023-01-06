@@ -101,5 +101,5 @@ process run_velocyto {
 //the directory containing the loom file is passed to this channel where it is copied to outdir
 ch_output
   .subscribe {
-      it.copyTo("${outdir}/")
+      it.copyTo(!{params.outdir} + "/")
   }

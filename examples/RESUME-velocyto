@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-samplefile=/nfs/cellgeni/tickets/tic-1994/actions/1rods.txt
+samplefile=/nfs/cellgeni/tickets/tic-1994/actions/irods.txt
 config=/nfs/cellgeni/tickets/tic-1994/actions/nextflow.config
 
 [[ -e "$samplefile" ]] || (echo "File "$samplefile" not found" && false)
