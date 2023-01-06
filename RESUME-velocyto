@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -euo pipefail
+
+samplefile=/nfs/cellgeni/tickets/tic-1994/actions/irods.txt
+config=/nfs/cellgeni/tickets/tic-1994/actions/velocyto.config
+
+[[ -e "$samplefile" ]] || (echo "File "$samplefile" not found" && false)
+
+nextflow run /nfs/cellgeni/tickets/tic-1994/actions/velocyto.nf \
+  --SAMPLEFILE $samplefile \
+  -c $config \
+  -with-trace "reports/trace.txt" \
+  -with-report "reports/report.html" \
+  -with-timeline "reports/timeline.txt" \
+  -w velocyto-work \
+  --ansi-log false \
+  -resume
