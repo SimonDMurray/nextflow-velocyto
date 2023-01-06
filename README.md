@@ -6,7 +6,7 @@ Nextflow version of cellgeni/velocyto for testing on Nextflow Tower
 * `/path/to/config/file`
 * `/path/to/nextflow/script`
 
-`nextflow.config` - the configuration script that allows the processes to be submittede to IBM LSF on Sanger's HPC and ensures correct environment is set via singularity container (this is an absolute path)
+`nextflow.config` - the configuration script that allows the processes to be submittede to IBM LSF on Sanger's HPC and ensures correct environment is set via singularity container (this is an absolute path). Some global default parameters are also set in this file with absolute paths.
 
 `main.nf` - the pipeline script that executes velocyto
 
