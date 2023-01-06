@@ -3,22 +3,6 @@
 //Using DSL1 as there is no need for workflows due to being only two processes
 nextflow.enable.dsl=1
 
-//get_velocyto parameters
-params.barcode_path = 'filtered_feature_bc_matrix/barcodes.tsv.gz'
-params.bam_file = 'possorted_genome_bam.bam'
-params.index_file = 'possorted_genome_bam.bam'
-
-//run_velocyto parameters
-params.SAMPLEFILE = null
-params.GTF = '/nfs/cellgeni/STAR/human/2020A/GRCh38_v32_filtered.gtf'
-params.RMSK = '/nfs/cellgeni/velocyto/GRCh38_rmsk.gtf'
-params.MEM = 7000
-params.THREADS = 16
-
-outdir = 'results'
-
-params.HELP = false
-
 def helpMessage() {
     log.info"""
     =================
