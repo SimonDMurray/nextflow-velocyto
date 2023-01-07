@@ -79,8 +79,8 @@ process run_velocyto {
   input:
   set NAME, val(files_list) from ch_run_velocyto
 
-  //output:
-  //path('*.velocyto') into ch_output
+  output:
+  path('*.velocyto')
 
   shell:
   '''
