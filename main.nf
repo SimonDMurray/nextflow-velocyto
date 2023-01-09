@@ -74,7 +74,7 @@ process get_velocyto {
 process run_velocyto {
 
   //output velocyto files to results directory
-  publishDir !{params.outdir}
+  publishDir "$params.outdir"
 
   input:
   set NAME, val(files_list) from ch_run_velocyto
