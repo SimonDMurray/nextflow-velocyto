@@ -33,7 +33,8 @@
         },
         "bam_on_irods": {
           "type": "string",
-          "default": "true"
+          "default": "true",
+          "description": "Tells pipeline whether to look for the bam file on IRODS or the FARM (default true means look on IRODS)."
         },
         "GTF": {
           "type": "string",
