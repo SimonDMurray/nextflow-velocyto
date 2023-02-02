@@ -43,41 +43,121 @@ def errorMessage() {
 //Puts samplefile into a channel unless it is null, if it is null then it displays error message and exits with status 1.
 ch_sample_list = params.SAMPLEFILE != null ? Channel.fromPath(params.SAMPLEFILE) : errorMessage() 
 
-//Each line of the sample file is read and then emitted to its own channel which is used as input to the first process, so each sample will be ran in parallel
+//Each line of the sample file is read and then emitted to its own set of channels, so each sample will be ran in parallel
+
+ch_get_local_barcodes = Channel.create()
+ch_get_irods_barcodes = Channel.create()
+ch_get_local_bam = Channel.create()
+ch_get_irods_bam = Channel.create()
+
 ch_sample_list
   .flatMap{ it.readLines() }
-  .set { ch_samplelines_sf }
+  .tap( ch_get_local_barcodes )
+  .tap( ch_get_irods_barcodes )
+  .tap( ch_get_local_bam )
+  .tap( ch_get_irods_bam )
+  .set { ch_get_sample_id }
 
-process get_velocyto {
+process get_local_barcodes {
+
+  when:
+  params.barcodes_on_irods == false
 
   input:
-  val(sample) from ch_samplelines_sf
+  val(sample) from ch_get_local_barcodes
 
   output:
-  //outputs multiple objects: sample name (generated in the process shell so needs env) and a list of all files generated in processing
-  set env(NAME), path('*') into ch_run_velocyto 
+  env(name) into ch_local_sample_id
+  path('*barcodes.tsv') into ch_from_local_barcodes
 
   shell:
   '''
-  NAME=`echo !{sample} | cut -f 1 -d " "`
-  IRODSPATH=`echo !{sample} | cut -f 2 -d " "`
-  iget -f -v -N 4 -K $IRODSPATH/!{params.barcode_path}
-  gunzip barcodes.tsv.gz
-  mv barcodes.tsv $NAME.barcodes.tsv
-  iget -f -v -N 4 -K $IRODSPATH/!{params.bam_file}
-  mv !{params.bam_file} $NAME.bam
-  iget -f -v -N 4 -K $IRODSPATH/!{params.index_file}
-  mv !{params.index_file} $NAME.bam.bai
+  name=`echo !{sample} | cut -f 1 -d " "`
+  barcodes_path=`echo !{sample} | cut -f 3 -d " "`
+  cp "${barcodes_path}" "${name}.barcodes.tsv.gz"
+  gunzip "${name}.barcodes.tsv.gz"
   '''
 }
+
+process get_irods_barcodes {
+
+  when:
+  params.barcodes_on_irods == true
+
+  input:
+  val(sample) from ch_get_irods_barcodes
+
+  output:
+  env(name) into ch_irods_sample_id
+  path('*barcodes.tsv') into ch_from_irods_barcodes
+
+  shell:
+  '''
+  name=`echo !{sample} | cut -f 1 -d " "`
+  barcodes_path=`echo !{sample} | cut -f 3 -d " "`
+  iget -f -v -N 4 -K "${barcodes_path}" "${name}.barcodes.tsv.gz"
+  gunzip "${name}.barcodes.tsv.gz"
+  '''
+}
+
+process get_local_bam {
+
+  when:
+  params.bam_on_irods == false
+
+  input:
+  val(sample) from ch_get_local_bam
+
+  output:
+  path('*bam') into ch_from_local_bam
+  path('*bam.bai') into ch_from_local_index
+
+  shell:
+  '''
+  name=`echo !{sample} | cut -f 1 -d " "`
+  bam_path=`echo !{sample} | cut -f 2 -d " "`
+  cp "${bam_path}" "${name}.bam"
+  cp "${bam_path}.bai" "${name}.bam.bai"
+  '''
+}
+
+process get_irods_bam {
+
+  when:
+  params.bam_on_irods == true
+
+  input:
+  val(sample) from ch_get_irods_bam
+
+  output:
+  path('*bam') into ch_from_irods_bam
+  path('*bam.bai') into ch_from_irods_index
+
+  shell:
+  '''
+  name=`echo !{sample} | cut -f 1 -d " "`
+  bam_path=`echo !{sample} | cut -f 2 -d " "`
+  iget -f -v -N 4 -K "${bam_path}" "${name}.bam"
+  iget -f -v -N 4 -K "${bam_path}.bai" "${name}.bam.bai" 
+  '''
+}
+
+//ternary operators used in combination with process conditions to ensure files are grabbed from the right place
+ch_run_velocyto_sample = params.barcodes_on_irods == true ? ch_irods_sample_id : ch_local_sample_id
+ch_run_velocyto_barcodes = params.barcodes_on_irods == true ? ch_from_irods_barcodes : ch_from_local_barcodes
+ch_run_velocyto_bam = params.bam_on_irods == true ? ch_from_irods_bam : ch_from_local_bam
+ch_run_velocyto_index = params.bam_on_irods == true ? ch_from_irods_index : ch_from_local_index
 
 process run_velocyto {
 
   //output velocyto files to results directory
-  publishDir "$params.outdir", mode: 'copy'
+  publishDir "$params.outdir"
 
   input:
-  set NAME, val(files_list) from ch_run_velocyto
+  val(name) from ch_run_velocyto_sample
+  path(barcodes) from ch_run_velocyto_barcodes
+  path(bam) from ch_run_velocyto_bam
+  path(index) from ch_run_velocyto_index
 
   output:
   path('*.velocyto')
@@ -86,18 +166,14 @@ process run_velocyto {
   '''
   export LC_ALL=C.UTF-8
   export LANG=C.UTF-8
-  bam_file=!{files_list[0]}
-  index_file=!{files_list[1]}
-  barcodes_file=!{files_list[2]}
   velocyto run \
     -t uint32 \
     --samtools-threads !{params.THREADS} \
     --samtools-memory !{params.MEM} \
-    -b $barcodes_file \
-    -o !{NAME}.velocyto \
+    -b !{barcodes} \
+    -o !{name}.velocyto \
     -m !{params.RMSK} \
-    $bam_file \
+    !{bam} \
     !{params.GTF}
   '''
 }
-
