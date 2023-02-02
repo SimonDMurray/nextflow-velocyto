@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-samplefile=/nfs/cellgeni/tickets/tic-1994/actions/irods.txt
+samplefile=/nfs/cellgeni/tickets/tic-1994/actions/1rods.txt
 config=/nfs/cellgeni/tickets/tic-1994/actions/nextflow.config
 
 [[ -e "$samplefile" ]] || (echo "File "$samplefile" not found" && false)
@@ -10,6 +10,7 @@ config=/nfs/cellgeni/tickets/tic-1994/actions/nextflow.config
 nextflow run /nfs/cellgeni/tickets/tic-1994/actions/main.nf \
   --SAMPLEFILE $samplefile \
   -c $config \
+  --outdir "./velocyto-outdir-irods" \
   -w velocyto-work \
   --ansi-log false \
   -resume
