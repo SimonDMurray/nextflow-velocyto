@@ -14,7 +14,7 @@
       "properties": {
         "SAMPLEFILE": {
           "type": "string",
-          "description": "The sample file provided to the pipeline. This file should have one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!). These should be tab-separated."
+          "description": "The sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
         },
         "outdir": {
           "type": "string",
