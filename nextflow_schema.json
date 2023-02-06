@@ -5,36 +5,23 @@
   "description": "",
   "type": "object",
   "definitions": {
-    "input_output_options": {
-      "title": "Input/output options",
+    "user_parameters": {
+      "title": "User_parameters",
       "type": "object",
-      "fa_icon": "fas fa-terminal",
-      "description": "Define where the pipeline should find input data and save output data.",
-      "required": ["SAMPLEFILE", "outdir", "reportdir"],
+      "description": "",
+      "default": "",
       "properties": {
         "SAMPLEFILE": {
           "type": "string",
           "description": "The sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
         },
-        "outdir": {
-          "type": "string",
-          "format": "directory-path",
-          "description": "The output directory where the results will be saved. You have to use absolute paths to FARM locations (i.e. starting with /lustre or /nfs)",
-          "fa_icon": "fas fa-folder-open"
-        },
-        "reportdir": {
-          "type": "string",
-          "description": "The output directory where the log files will be saved. You have to use absolute paths to FARM locations (i.e. starting with /lustre or /nfs)"
-        },
         "barcodes_on_irods": {
           "type": "string",
-          "default": "true",
-          "description": "Tells pipeline whether to look for the barcodes file on IRODS or the FARM (default true means look on IRODS)."
+          "default": "true"
         },
         "bam_on_irods": {
           "type": "string",
-          "default": "true",
-          "description": "Tells pipeline whether to look for the bam file on IRODS or the FARM (default true means look on IRODS)."
+          "default": "true"
         },
         "GTF": {
           "type": "string",
@@ -46,12 +33,13 @@
           "default": "/nfs/cellgeni/velocyto/GRCh38_rmsk.gtf",
           "description": "Tells pipeline which mask file to use (by defaul GRCh38 is used)."
         }
-      }
+      },
+      "required": ["SAMPLEFILE"]
     }
   },
   "allOf": [
     {
-      "$ref": "#/definitions/input_output_options"
+      "$ref": "#/definitions/user_parameters"
     }
   ]
 }

@@ -9,8 +9,8 @@ config=/nfs/cellgeni/tickets/tic-1994/actions/nextflow.config
 
 nextflow run /nfs/cellgeni/tickets/tic-1994/actions/main.nf \
   --SAMPLEFILE $samplefile \
+  --sangerID "sm42" \
   -c $config \
-  --outdir "./velocyto-outdir-irods" \
   -w velocyto-work \
   --ansi-log false \
   -resume
