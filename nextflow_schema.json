@@ -37,7 +37,7 @@
         "RMSK": {
           "type": "string",
           "default": "/nfs/cellgeni/velocyto/GRCh38_rmsk.gtf",
-          "description": "Tells pipeline which mask file to use (by defaul GRCh38 is used)."
+          "description": "Tells pipeline which mask file to use (by default GRCh38 is used)."
         }
       },
       "required": ["SAMPLEFILE", "sangerID"]
