@@ -13,7 +13,7 @@
       "properties": {
         "SAMPLEFILE": {
           "type": "string",
-          "description": "he sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
+          "description": "The sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
         },
         "sangerID": {
           "type": "string",
