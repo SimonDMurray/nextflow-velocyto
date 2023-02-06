@@ -2,14 +2,14 @@
 
 set -euo pipefail
 
-samplefile=/nfs/cellgeni/tickets/tic-1994/actions/1rods.txt
+samplefile=/nfs/cellgeni/tickets/tic-1994/actions/example.txt
 config=/nfs/cellgeni/tickets/tic-1994/actions/nextflow.config
 
 [[ -e "$samplefile" ]] || (echo "File "$samplefile" not found" && false)
 
 nextflow run /nfs/cellgeni/tickets/tic-1994/actions/main.nf \
   --SAMPLEFILE $samplefile \
-  --sangerID "sm42" \
+  --sangerID "user99" \
   -c $config \
   -w velocyto-work \
   --ansi-log false \

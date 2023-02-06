@@ -1,0 +1,2 @@
+SL_CRTexp13190655	/seq/illumina/runs/46/46200/cellranger/cellranger600_count_46200_SL_CRTexp13190655_GRCh38-2020-A/possorted_genome_bam.bam	/seq/illumina/runs/46/46200/cellranger/cellranger600_count_46200_SL_CRTexp13190655_GRCh38-2020-A/filtered_feature_bc_matrix/barcodes.tsv.gz
+SL_CRTexp13190656	/seq/illumina/runs/46/46200/cellranger/cellranger600_count_46200_SL_CRTexp13190656_GRCh38-2020-A/possorted_genome_bam.bam	/seq/illumina/runs/46/46200/cellranger/cellranger600_count_46200_SL_CRTexp13190656_GRCh38-2020-A/filtered_feature_bc_matrix/barcodes.tsv.gz

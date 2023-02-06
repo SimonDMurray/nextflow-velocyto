@@ -9,11 +9,12 @@ def helpMessage() {
     velocyto pipeline
     =================
     This pipeline runs Velocyto. 
-    The only parameter you need to input is:
+    The only parameters you need to input are:
       --SAMPLEFILE /full/path/to/sample/file
+      --sampleID user99
     This file should be a tsv with 3 columns: SAMPLEID\t/PATH/TO/BAM/t/PATH/TO/BARCODES
     Each line should only contain information on a single sample.
-    An example can be seen here: https://github.com/cellgeni/velocyto/blob/master/example-data/irods.txt
+    An example can be seen here: https://github.com/cellgeni/velocyto/blob/master/example-data/example.txt
     The default reference GTF used is: GRCh38_v32_filtered.gtf
     The default masked gtf used is: GRCh38_rmsk.gtf
     To change these defaults input:
@@ -44,6 +45,7 @@ process email_startup {
   
   shell:
   '''
+  contents=`cat !{params.SAMPLEFILE}`
   sendmail "!{params.sangerID}@sanger.ac.uk" <<EOF
   Subject: Launched pipeline
   From: noreply-cellgeni-pipeline@sanger.ac.uk
@@ -53,6 +55,9 @@ process email_startup {
   Samplefile: !{params.SAMPLEFILE}
   The Genome GTF file used is: !{params.GTF}
   The Mask file used is: !{params.RMSK}
+  
+  Your sample file looks like:
+  $contents
 
   Thanks,
   Cellular Genetics Informatics
@@ -181,15 +186,23 @@ process run_velocyto {
 
   output:
   path('*.velocyto')
-  val(name) into ch_email_finish_sample
-  path(barcodes) into ch_email_finish_barcodes
-  path(bam) into ch_email_finish_bam
-  path(index) into ch_email_finish_index
+  val(name) into ch_collect
 
   shell:
   '''
   export LC_ALL=C.UTF-8
   export LANG=C.UTF-8
+  
+  echo "velocyto run \
+    -t uint32 \
+    --samtools-threads !{params.THREADS} \
+    --samtools-memory !{params.MEM} \
+    -b !{barcodes} \
+    -o !{name}.velocyto \
+    -m !{params.RMSK} \
+    !{bam} \
+    !{params.GTF}" > "!{name}.velocyto/cmd.txt"
+    
   velocyto run \
     -t uint32 \
     --samtools-threads !{params.THREADS} \
@@ -202,13 +215,14 @@ process run_velocyto {
   '''
 }
 
+ch_collect
+  .collect()
+  .set{ ch_email_finish_sample }
+
 process email_finish {
   
   input:
   val(name) from ch_email_finish_sample
-  path(barcodes) from ch_email_finish_barcodes
-  path(bam) from ch_email_finish_bam
-  path(index) from ch_email_finish_index
   
   shell:
   '''
@@ -223,16 +237,18 @@ process email_finish {
   The results will be deleted in a week so please copy your data to a sensible location, i.e.:
   cp -r "/lustre/scratch126/cellgen/cellgeni/tickets/nextflow-tower-results/!{params.sangerID}/!{params.timestamp}/velocyto-results" /path/to/sensible/location
   
-  The velocyto command run was:
+  The general velocyto command run was:
   velocyto run \
     -t uint32 \
     --samtools-threads !{params.THREADS} \
     --samtools-memory !{params.MEM} \
-    -b !{barcodes} \
-    -o !{name}.velocyto \
+    -b "sample-barcodes" \
+    -o "sample-velocyto" \
     -m !{params.RMSK} \
-    !{bam} \
+    "sample-bam" \
     !{params.GTF}
+  
+  Each sample has the command run documented inside: "sampleID/cmd.txt"
 
   Thanks,
   Cellular Genetics Informatics

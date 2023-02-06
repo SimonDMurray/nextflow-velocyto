@@ -6,14 +6,18 @@
   "type": "object",
   "definitions": {
     "user_parameters": {
-      "title": "User_parameters",
+      "title": "User parameters",
       "type": "object",
       "description": "",
       "default": "",
       "properties": {
         "SAMPLEFILE": {
           "type": "string",
-          "description": "The sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
+          "description": "he sample file provided to the pipeline. This is a tab-separated file with one sample per line. Each line should contain a sample id, path to bam file, path to barcodes file (in that order!)."
+        },
+        "sangerID": {
+          "type": "string",
+          "description": "Your Sanger ID i.e user99 (NOT your email)."
         },
         "barcodes_on_irods": {
           "type": "string",
@@ -34,7 +38,7 @@
           "description": "Tells pipeline which mask file to use (by defaul GRCh38 is used)."
         }
       },
-      "required": ["SAMPLEFILE"]
+      "required": ["SAMPLEFILE", "sangerID"]
     }
   },
   "allOf": [
