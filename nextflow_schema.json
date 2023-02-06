@@ -21,12 +21,12 @@
         },
         "barcodes_on_irods": {
           "type": "string",
-          "default": "true"
+          "default": "true",
           "description": "Tells pipeline whether to look for the barcodes file on IRODS or the FARM (default true means look on IRODS)."
         },
         "bam_on_irods": {
           "type": "string",
-          "default": "true"
+          "default": "true",
           "description": "Tells pipeline whether to look for the bam file on IRODS or the FARM (default true means look on IRODS)."
         },
         "GTF": {
