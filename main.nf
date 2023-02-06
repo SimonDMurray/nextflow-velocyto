@@ -193,15 +193,7 @@ process run_velocyto {
   export LC_ALL=C.UTF-8
   export LANG=C.UTF-8
   
-  echo "velocyto run \
-    -t uint32 \
-    --samtools-threads !{params.THREADS} \
-    --samtools-memory !{params.MEM} \
-    -b !{barcodes} \
-    -o !{name}.velocyto \
-    -m !{params.RMSK} \
-    !{bam} \
-    !{params.GTF}" > "!{name}.velocyto/cmd.txt"
+  echo "velocyto run -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{name}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{name}.velocyto/cmd.txt"
     
   velocyto run \
     -t uint32 \
