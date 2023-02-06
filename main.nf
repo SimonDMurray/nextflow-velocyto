@@ -50,7 +50,7 @@ process email_startup {
   Subject: Launched pipeline
   From: noreply-cellgeni-pipeline@sanger.ac.uk
 
-  Hi there, you've launched Cellular Genetics Informatic's Velocyto pipeline.
+  Hi there, you've launched Cellular Genetics Informatics' Velocyto pipeline.
   Your parameters are:
   Samplefile: !{params.SAMPLEFILE}
   The Genome GTF file used is: !{params.GTF}
@@ -222,7 +222,7 @@ process email_finish {
   Subject: Finished pipeline
   From: noreply-cellgeni-pipeline@sanger.ac.uk
 
-  Hi there, your run of Cellular Genetics Informatic's Velocyto pipeline is complete.
+  Hi there, your run of Cellular Genetics Informatics' Velocyto pipeline is complete.
   
   Results are available here: "/lustre/scratch126/cellgen/cellgeni/tickets/nextflow-tower-results/!{params.sangerID}/!{params.timestamp}/velocyto-results"
   
