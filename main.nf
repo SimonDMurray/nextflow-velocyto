@@ -92,15 +92,15 @@ process get_local_barcodes {
   val(sample) from ch_get_local_barcodes
 
   output:
-  env(name) into ch_local_sample_id
+  env(NAME) into ch_local_sample_id
   path('*barcodes.tsv') into ch_from_local_barcodes
 
   shell:
   '''
-  name=`echo !{sample} | cut -f 1 -d " "`
+  NAME=`echo !{sample} | cut -f 1 -d " "`
   barcodes_path=`echo !{sample} | cut -f 3 -d " "`
-  cp "${barcodes_path}" "${name}.barcodes.tsv.gz"
-  gunzip "${name}.barcodes.tsv.gz"
+  cp "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
+  gunzip "${NAME}.barcodes.tsv.gz"
   '''
 }
 
@@ -115,15 +115,15 @@ process get_irods_barcodes {
   val(sample) from ch_get_irods_barcodes
 
   output:
-  env(name) into ch_irods_sample_id
+  env(NAME) into ch_irods_sample_id
   path('*barcodes.tsv') into ch_from_irods_barcodes
 
   shell:
   '''
-  name=`echo !{sample} | cut -f 1 -d " "`
+  NAME=`echo !{sample} | cut -f 1 -d " "`
   barcodes_path=`echo !{sample} | cut -f 3 -d " "`
-  iget -f -v -N 4 -K "${barcodes_path}" "${name}.barcodes.tsv.gz"
-  gunzip "${name}.barcodes.tsv.gz"
+  iget -f -v -N 4 -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
+  gunzip "${NAME}.barcodes.tsv.gz"
   '''
 }
 
@@ -141,10 +141,10 @@ process get_local_bam {
 
   shell:
   '''
-  name=`echo !{sample} | cut -f 1 -d " "`
+  NAME=`echo !{sample} | cut -f 1 -d " "`
   bam_path=`echo !{sample} | cut -f 2 -d " "`
-  cp "${bam_path}" "${name}.bam"
-  cp "${bam_path}.bai" "${name}.bam.bai"
+  cp "${bam_path}" "${NAME}.bam"
+  cp "${bam_path}.bai" "${NAME}.bam.bai"
   '''
 }
 
@@ -164,10 +164,10 @@ process get_irods_bam {
 
   shell:
   '''
-  name=`echo !{sample} | cut -f 1 -d " "`
+  NAME=`echo !{sample} | cut -f 1 -d " "`
   bam_path=`echo !{sample} | cut -f 2 -d " "`
-  iget -f -v -N 4 -K "${bam_path}" "${name}.bam"
-  iget -f -v -N 4 -K "${bam_path}.bai" "${name}.bam.bai" 
+  iget -f -v -N 4 -K "${bam_path}" "${NAME}.bam"
+  iget -f -v -N 4 -K "${bam_path}.bai" "${NAME}.bam.bai" 
   '''
 }
 
@@ -183,14 +183,14 @@ process run_velocyto {
   publishDir "/lustre/scratch126/cellgen/cellgeni/tickets/nextflow-tower-results/${params.sangerID}/${params.timestamp}/velocyto-results", mode: 'copy'
 
   input:
-  val(name) from ch_run_velocyto_sample
+  val(NAME) from ch_run_velocyto_sample
   path(barcodes) from ch_run_velocyto_barcodes
   path(bam) from ch_run_velocyto_bam
   path(index) from ch_run_velocyto_index
 
   output:
   path('*.velocyto')
-  val(name) into ch_collect
+  val(NAME) into ch_collect
 
   shell:
   '''
@@ -202,15 +202,15 @@ process run_velocyto {
     velocyto_cmd="velocyto run -U"
   fi
 
-  mkdir !{name}.velocyto
-  echo "${velocyto_cmd} -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{name}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{name}.velocyto/cmd.txt"
+  mkdir !{NAME}.velocyto
+  echo "${velocyto_cmd} -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{NAME}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{NAME}.velocyto/cmd.txt"
 
   $velocyto_cmd \
     -t uint32 \
     --samtools-threads !{params.THREADS} \
     --samtools-memory !{params.MEM} \
     -b !{barcodes} \
-    -o !{name}.velocyto \
+    -o !{NAME}.velocyto \
     -m !{params.RMSK} \
     !{bam} \
     !{params.GTF}
@@ -224,7 +224,7 @@ ch_collect
 process email_finish {
   
   input:
-  val(name) from ch_email_finish_sample
+  val(NAME) from ch_email_finish_sample
   
   shell:
   '''
