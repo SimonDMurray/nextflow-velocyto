@@ -86,7 +86,7 @@ ch_sample_list
 process get_local_barcodes {
 
   when:
-  params.barcodes_on_irods == false
+  params.barcodes_on_irods == "no"
 
   input:
   val(sample) from ch_get_local_barcodes
@@ -109,7 +109,7 @@ process get_irods_barcodes {
   maxForks 2
 
   when:
-  params.barcodes_on_irods == true
+  params.barcodes_on_irods == "yes"
 
   input:
   val(sample) from ch_get_irods_barcodes
@@ -130,7 +130,7 @@ process get_irods_barcodes {
 process get_local_bam {
 
   when:
-  params.bam_on_irods == false
+  params.bam_on_irods == "no"
 
   input:
   val(sample) from ch_get_local_bam
@@ -153,7 +153,7 @@ process get_irods_bam {
   maxForks 2
 
   when:
-  params.bam_on_irods == true
+  params.bam_on_irods == "yes"
 
   input:
   val(sample) from ch_get_irods_bam
@@ -172,10 +172,10 @@ process get_irods_bam {
 }
 
 //ternary operators used in combination with process conditions to ensure files are grabbed from the right place
-ch_run_velocyto_sample = params.barcodes_on_irods == true ? ch_irods_sample_id : ch_local_sample_id
-ch_run_velocyto_barcodes = params.barcodes_on_irods == true ? ch_from_irods_barcodes : ch_from_local_barcodes
-ch_run_velocyto_bam = params.bam_on_irods == true ? ch_from_irods_bam : ch_from_local_bam
-ch_run_velocyto_index = params.bam_on_irods == true ? ch_from_irods_index : ch_from_local_index
+ch_run_velocyto_sample = params.barcodes_on_irods == "yes" ? ch_irods_sample_id : ch_local_sample_id
+ch_run_velocyto_barcodes = params.barcodes_on_irods == "yes" ? ch_from_irods_barcodes : ch_from_local_barcodes
+ch_run_velocyto_bam = params.bam_on_irods == "yes" ? ch_from_irods_bam : ch_from_local_bam
+ch_run_velocyto_index = params.bam_on_irods == "yes" ? ch_from_irods_index : ch_from_local_index
 
 process run_velocyto {
 
@@ -197,10 +197,15 @@ process run_velocyto {
   export LC_ALL=C.UTF-8
   export LANG=C.UTF-8
  
-  mkdir !{name}.velocyto
-  echo "velocyto run -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{name}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{name}.velocyto/cmd.txt"
+  velocyto_cmd="velocyto run"
+  if [[ "!{params.bam_has_umis}" == "no" ]]; then
+    velocyto_cmd="velocyto run -U"
+  fi
 
-  velocyto run \
+  mkdir !{name}.velocyto
+  echo "${velocyto_cmd} -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{name}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{name}.velocyto/cmd.txt"
+
+  $velocyto_cmd \
     -t uint32 \
     --samtools-threads !{params.THREADS} \
     --samtools-memory !{params.MEM} \

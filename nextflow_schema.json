@@ -21,13 +21,18 @@
         },
         "barcodes_on_irods": {
           "type": "string",
-          "default": "true",
-          "description": "Tells pipeline whether to look for the gzipped barcodes file on IRODS or the FARM (default true means look on IRODS)."
+          "default": "yes",
+          "description": "Tells pipeline whether to look for the gzipped barcodes file on IRODS or the FARM (default yes means look on IRODS)."
         },
         "bam_on_irods": {
           "type": "string",
-          "default": "true",
-          "description": "Tells pipeline whether to look for the bam file on IRODS or the FARM (default true means look on IRODS)."
+          "default": "yes",
+          "description": "Tells pipeline whether to look for the bam file on IRODS or the FARM (default yes means look on IRODS)."
+        },
+        "bam_has_umis": {
+          "type": "string",
+          "default": "yes",
+          "description": "Tells the pipeline whether the BAM files have UMIs (default  yes means BAM contains UMIs)"
         },
         "GTF": {
           "type": "string",
