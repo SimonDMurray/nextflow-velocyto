@@ -119,6 +119,8 @@ process get_data {
 
 process run_velocyto {
 
+  maxForks 2
+  
   //output velocyto files to results directory
   publishDir "/lustre/scratch126/cellgen/cellgeni/tickets/nextflow-tower-results/${params.sangerID}/${params.timestamp}/velocyto-results", mode: 'copy'
 
