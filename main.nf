@@ -106,6 +106,8 @@ process get_local_barcodes {
 
 process get_irods_barcodes {
 
+  maxForks 2
+
   when:
   params.barcodes_on_irods == true
 
@@ -147,6 +149,8 @@ process get_local_bam {
 }
 
 process get_irods_bam {
+
+  maxForks 2
 
   when:
   params.bam_on_irods == true
