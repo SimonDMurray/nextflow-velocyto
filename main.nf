@@ -70,112 +70,52 @@ ch_sample_list = params.SAMPLEFILE != null ? Channel.fromPath(params.SAMPLEFILE)
 
 //Each line of the sample file is read and then emitted to its own set of channels, so each sample will be ran in parallel
 
-ch_get_local_barcodes = Channel.create()
-ch_get_irods_barcodes = Channel.create()
-ch_get_local_bam = Channel.create()
-ch_get_irods_bam = Channel.create()
-
 ch_sample_list
   .flatMap{ it.readLines() }
-  .tap( ch_get_local_barcodes )
-  .tap( ch_get_irods_barcodes )
-  .tap( ch_get_local_bam )
-  .tap( ch_get_irods_bam )
-  .set { ch_get_sample_id }
+  .set{ ch_get_data }
 
-process get_local_barcodes {
-
-  when:
-  params.barcodes_on_irods == "no"
-
-  input:
-  val(sample) from ch_get_local_barcodes
-
-  output:
-  env(NAME) into ch_local_sample_id
-  path('*barcodes.tsv') into ch_from_local_barcodes
-
-  shell:
-  '''
-  NAME=`echo !{sample} | cut -f 1 -d " "`
-  barcodes_path=`echo !{sample} | cut -f 3 -d " "`
-  cp "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
-  gunzip -f "${NAME}.barcodes.tsv.gz"
-  '''
-}
-
-process get_irods_barcodes {
+process get_data {
 
   maxForks 2
 
-  when:
-  params.barcodes_on_irods == "yes"
-
   input:
-  val(sample) from ch_get_irods_barcodes
+  val(sample) from ch_get_data
 
   output:
-  env(NAME) into ch_irods_sample_id
-  path('*barcodes.tsv') into ch_from_irods_barcodes
-
-  shell:
-  '''
-  NAME=`echo !{sample} | cut -f 1 -d " "`
-  barcodes_path=`echo !{sample} | cut -f 3 -d " "`
-  iget -f -v -N 4 -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
-  gunzip -f "${NAME}.barcodes.tsv.gz"
-  '''
-}
-
-process get_local_bam {
-
-  when:
-  params.bam_on_irods == "no"
-
-  input:
-  val(sample) from ch_get_local_bam
-
-  output:
-  path('*bam') into ch_from_local_bam
-  path('*bam.bai') into ch_from_local_index
+  env(NAME) into ch_run_velocyto_sample
+  path('*barcodes.tsv') into ch_run_velocyto_barcodes
+  path('*bam') into ch_run_velocyto_bam
+  path('*bam.bai') into ch_run_velocyto_index
 
   shell:
   '''
   NAME=`echo !{sample} | cut -f 1 -d " "`
   bam_path=`echo !{sample} | cut -f 2 -d " "`
-  cp "${bam_path}" "${NAME}.bam"
-  cp "${bam_path}.bai" "${NAME}.bam.bai"
+  barcodes_path=`echo !{sample} | cut -f 3 -d " "`
+  
+  if [[ "!{params.bam_on_irods}" == "no" ]]; then
+    cp "${bam_path}" "${NAME}.bam"
+    cp "${bam_path}.bai" "${NAME}.bam.bai"
+  elif [[ "!{params.bam_on_irods}" == "yes" ]]; then
+    iget -f -v -N 4 -K "${bam_path}" "${NAME}.bam"
+    iget -f -v -N 4 -K "${bam_path}.bai" "${NAME}.bam.bai"
+  else
+    echo "incorrect bam option"
+    exit 1
+  fi
+
+  if [[ "!{params.barcodes_on_irods}" == "no" ]]; then
+    cp "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
+    gunzip -f "${NAME}.barcodes.tsv.gz"
+  elif [[ "!{params.barcodes_on_irods}" == "yes" ]]; then
+    iget -f -v -N 4 -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
+    gunzip -f "${NAME}.barcodes.tsv.gz"
+  else
+    echo "incorrect barcodes option"
+    exit 1
+  fi
   '''
 }
-
-process get_irods_bam {
-
-  maxForks 2
-
-  when:
-  params.bam_on_irods == "yes"
-
-  input:
-  val(sample) from ch_get_irods_bam
-
-  output:
-  path('*bam') into ch_from_irods_bam
-  path('*bam.bai') into ch_from_irods_index
-
-  shell:
-  '''
-  NAME=`echo !{sample} | cut -f 1 -d " "`
-  bam_path=`echo !{sample} | cut -f 2 -d " "`
-  iget -f -v -N 4 -K "${bam_path}" "${NAME}.bam"
-  iget -f -v -N 4 -K "${bam_path}.bai" "${NAME}.bam.bai" 
-  '''
-}
-
-//ternary operators used in combination with process conditions to ensure files are grabbed from the right place
-ch_run_velocyto_sample = params.barcodes_on_irods == "yes" ? ch_irods_sample_id : ch_local_sample_id
-ch_run_velocyto_barcodes = params.barcodes_on_irods == "yes" ? ch_from_irods_barcodes : ch_from_local_barcodes
-ch_run_velocyto_bam = params.bam_on_irods == "yes" ? ch_from_irods_bam : ch_from_local_bam
-ch_run_velocyto_index = params.bam_on_irods == "yes" ? ch_from_irods_index : ch_from_local_index
 
 process run_velocyto {
 
