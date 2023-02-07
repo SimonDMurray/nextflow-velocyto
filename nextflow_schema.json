@@ -32,7 +32,7 @@
         "bam_has_umis": {
           "type": "string",
           "default": "yes",
-          "description": "Tells the pipeline whether the BAM files have UMIs (default  yes means BAM contains UMIs)"
+          "description": "Tells the pipeline whether the BAM files have UMIs (default  yes means BAM contains UMIs)."
         },
         "GTF": {
           "type": "string",
