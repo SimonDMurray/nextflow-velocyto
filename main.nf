@@ -100,7 +100,7 @@ process get_local_barcodes {
   NAME=`echo !{sample} | cut -f 1 -d " "`
   barcodes_path=`echo !{sample} | cut -f 3 -d " "`
   cp "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
-  gunzip "${NAME}.barcodes.tsv.gz"
+  gunzip -f "${NAME}.barcodes.tsv.gz"
   '''
 }
 
@@ -123,7 +123,7 @@ process get_irods_barcodes {
   NAME=`echo !{sample} | cut -f 1 -d " "`
   barcodes_path=`echo !{sample} | cut -f 3 -d " "`
   iget -f -v -N 4 -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
-  gunzip "${NAME}.barcodes.tsv.gz"
+  gunzip -f "${NAME}.barcodes.tsv.gz"
   '''
 }
 
