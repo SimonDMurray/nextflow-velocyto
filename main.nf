@@ -142,7 +142,7 @@ process run_velocyto {
     velocyto_cmd="velocyto run -U"
   fi
 
-  mkdir !{NAME}.velocyto
+  mkdir -p !{NAME}.velocyto
   echo "${velocyto_cmd} -t uint32 --samtools-threads !{params.THREADS} --samtools-memory !{params.MEM} -b !{barcodes} -o !{NAME}.velocyto -m !{params.RMSK} !{bam} !{params.GTF}" > "!{NAME}.velocyto/cmd.txt"
 
   $velocyto_cmd \
