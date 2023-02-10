@@ -95,8 +95,8 @@ process get_data {
     cp "${bam_path}" "${NAME}.bam"
     cp "${bam_path}.bai" "${NAME}.bam.bai"
   elif [[ "!{params.bam_on_irods}" == "yes" ]]; then
-    iget -f -v -N 4 -K "${bam_path}" "${NAME}.bam"
-    iget -f -v -N 4 -K "${bam_path}.bai" "${NAME}.bam.bai"
+    iget -f -v -K "${bam_path}" "${NAME}.bam"
+    iget -f -v -K "${bam_path}.bai" "${NAME}.bam.bai"
   else
     echo "incorrect bam option"
     exit 1
@@ -106,7 +106,7 @@ process get_data {
     cp "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
     gunzip -f "${NAME}.barcodes.tsv.gz"
   elif [[ "!{params.barcodes_on_irods}" == "yes" ]]; then
-    iget -f -v -N 4 -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
+    iget -f -v -K "${barcodes_path}" "${NAME}.barcodes.tsv.gz"
     gunzip -f "${NAME}.barcodes.tsv.gz"
   else
     echo "incorrect barcodes option"
