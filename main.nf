@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 
-//Using DSL1 as there is no need for workflows due to being only two processes
-nextflow.enable.dsl=1
+nextflow.enable.dsl=2
 
 def helpMessage() {
     log.info"""
@@ -21,11 +20,6 @@ def helpMessage() {
       --GTF /path/to/reference/gtf
       --RMSK /path/to/mask/gtf
     """.stripIndent()
-}
-
-if (params.HELP) {
-  helpMessage()
-  exit 0
 }
 
 def errorMessage() {
@@ -65,25 +59,16 @@ process email_startup {
   '''
 }
 
-//Puts samplefile into a channel unless it is null, if it is null then it displays error message and exits with status 1.
-ch_sample_list = params.SAMPLEFILE != null ? Channel.fromPath(params.SAMPLEFILE) : errorMessage() 
-
-//Each line of the sample file is read and then emitted to its own set of channels, so each sample will be ran in parallel
-
-ch_sample_list
-  .flatMap{ it.readLines() }
-  .set{ ch_get_data }
-
 process get_data {
 
   input:
-  val(sample) from ch_get_data
+  val(sample) 
 
   output:
-  env(NAME) into ch_run_velocyto_sample
-  path('*barcodes.tsv') into ch_run_velocyto_barcodes
-  path('*bam') into ch_run_velocyto_bam
-  path('*bam.bai') into ch_run_velocyto_index
+  env(NAME), emit: name 
+  path('*barcodes.tsv'), emit: barcodes  
+  path('*bam'), emit: bam 
+  path('*bam.bai'), emit: index 
 
   shell:
   '''
@@ -121,14 +106,13 @@ process run_velocyto {
   publishDir "/lustre/scratch126/cellgen/cellgeni/tickets/nextflow-tower-results/${params.sangerID}/${params.timestamp}/velocyto-results", mode: 'copy'
 
   input:
-  val(NAME) from ch_run_velocyto_sample
-  path(barcodes) from ch_run_velocyto_barcodes
-  path(bam) from ch_run_velocyto_bam
-  path(index) from ch_run_velocyto_index
+  val(NAME) 
+  path(barcodes) 
+  path(bam) 
+  path(index) 
 
   output:
   path('*.velocyto')
-  val(NAME) into ch_collect
 
   shell:
   '''
@@ -155,14 +139,10 @@ process run_velocyto {
   '''
 }
 
-ch_collect
-  .collect()
-  .set{ ch_email_finish_sample }
-
 process email_finish {
   
   input:
-  val(NAME) from ch_email_finish_sample
+  val(NAME) 
   
   shell:
   '''
@@ -194,4 +174,25 @@ process email_finish {
   Cellular Genetics Informatics
   EOF
   '''
+}
+
+workflow {
+  if (params.HELP) {
+    helpMessage()
+    exit 0
+  }
+  else {
+    //Puts samplefile into a channel unless it is null, if it is null then it displays error message and exits with status 1.
+    ch_sample_list = params.SAMPLEFILE != null ? Channel.fromPath(params.SAMPLEFILE) : errorMessage()
+    if (params.sangerID == null) {
+      errorMessage()
+    }
+    else {
+      email_startup()
+      ch_sample_list | flatMap{ it.readLines() } | get_data 
+      run_velocyto(get_data.out.name, get_data.out.barcodes, get_data.out.bam, get_data.out.index) \
+      | collect \
+      | email_finish
+    }
+  }
 }
